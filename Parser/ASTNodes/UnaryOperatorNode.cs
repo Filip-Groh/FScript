@@ -1,4 +1,11 @@
 ﻿namespace Parser.ASTNodes {
-    internal class UnaryOperatorNode : AST {
+    public class UnaryOperatorNode : AST {
+        public UnaryOperatorNode() { 
+        
+        }
+
+        public override string ToString() {
+            throw new NotImplementedException();
+        }
     }
 }

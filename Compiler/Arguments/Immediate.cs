@@ -1,8 +1,8 @@
-﻿namespace Parser.ASTNodes {
-    public class NumberNode : AST {
+﻿namespace Compiler.Arguments {
+    public class Immediate : Argument {
         public int value;
-
-        public NumberNode(int value) { 
+        
+        public Immediate(int value) { 
             this.value = value;
         }
 

@@ -1,5 +1,5 @@
 ﻿namespace Parser {
-    public class AST {
-
+    abstract public class AST {
+        abstract public override string ToString();
     }
 }

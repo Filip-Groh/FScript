@@ -27,14 +27,23 @@ namespace CLI {
 
 
 
-            AST abstractSyntaxTree = Parser.Parser.Parse(tokens);
+            Parser.Parser parser = new Parser.Parser(tokens);
+            AST abstractSyntaxTree = parser.Parse();
+
+            Console.WriteLine(abstractSyntaxTree);
 
 
 
-            Bytecode bytecode = Compiler.Compiler.CompileToBytecode(abstractSyntaxTree);
+            Compiler.Compiler compiler = new Compiler.Compiler(abstractSyntaxTree);
+            Bytecode[] bytecode = compiler.CompileToBytecode();
+
+            Console.WriteLine(Compiler.Compiler.ArrayToString(bytecode));
 
             if (runInterpreted) {
-                Interpreter.Interpreter.Execute(bytecode);
+                Interpreter.Interpreter interpreter = new Interpreter.Interpreter(bytecode);
+                interpreter.Execute();
+
+                Console.WriteLine(interpreter);
             } else {
                 JIT.JIT.Process(bytecode);
             }

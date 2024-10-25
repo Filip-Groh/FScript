@@ -4,7 +4,7 @@
         CloseParam
     }
 
-    internal class ParamToken : StaticToken {
+    public class ParamToken : StaticToken {
         public ParamType type;
 
         public ParamToken(string text, ParamType type) : base(text) {

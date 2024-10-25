@@ -1,5 +1,5 @@
 ﻿namespace Compiler {
-    public abstract class Bytecode {
+    public abstract class Argument {
         public abstract override string ToString();
     }
 }

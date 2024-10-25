@@ -6,8 +6,8 @@
         Divide
     }
 
-    internal class OperatorToken : StaticToken {
-        OperatorType type;
+    public class OperatorToken : StaticToken {
+        public OperatorType type;
 
         public OperatorToken(string text, OperatorType type) : base(text) {
             this.type = type;
