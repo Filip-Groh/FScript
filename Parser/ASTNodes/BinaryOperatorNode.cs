@@ -32,7 +32,7 @@
         }
 
         public override string ToString() {
-            return $"[{this.left} {GetTextOfBinaryOperation(operation)} {this.right}]";
+            return $"[{left} {GetTextOfBinaryOperation(operation)} {right}]";
         }
     }
 }

@@ -29,7 +29,45 @@ namespace Parser {
         }
 
         public AST Parse() {
-            return Additive();
+            return Equality();
+        }
+
+        AST Equality() {
+            AST left = Relational();
+            if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.Equal) {
+                Step();
+                return new ComparisonNode(Comparison.Equal, left, Relational());
+            }
+
+            if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.NotEqual) {
+                Step();
+                return new ComparisonNode(Comparison.NotEqual, left, Relational());
+            }
+            return left;
+        }
+
+        AST Relational() {
+            AST left = Additive();
+            if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.LessThan) {
+                Step();
+                return new ComparisonNode(Comparison.LessThan, left, Relational());
+            }
+
+            if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.LessThanOrEqual) {
+                Step();
+                return new ComparisonNode(Comparison.LessThanOrEqual, left, Relational());
+            }
+
+            if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.GreaterThan) {
+                Step();
+                return new ComparisonNode(Comparison.GreaterThan, left, Relational());
+            }
+
+            if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.GreaterThanOrEqual) {
+                Step();
+                return new ComparisonNode(Comparison.GreaterThanOrEqual, left, Relational());
+            }
+            return left;
         }
 
         AST Additive() {
@@ -69,6 +107,11 @@ namespace Parser {
         }
 
         AST Unary() {
+            if (currentToken.GetType() == typeof(OperatorToken) && ((OperatorToken)currentToken).type == OperatorType.Minus) {
+                Step();
+                return new UnaryOperatorNode(Primary());
+            }
+
             return Primary(); 
         }
 

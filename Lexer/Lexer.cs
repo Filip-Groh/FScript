@@ -32,13 +32,16 @@ namespace Lexer {
 
                 ProcessOperator();
                 ProcessParam();
+                ProcessAssignmentAndComparison();
 
                 if (Char.IsAsciiLetter(currentChar)) { 
                     ProcessIdentifier();
                 } else if (Char.IsAsciiDigit(currentChar)) {
                     ProcessNumber();
                 } else {
-                    tokens.Add(new Token(currentChar.ToString()));
+                    if (!Char.IsWhiteSpace(currentChar)) {
+                        tokens.Add(new Token(currentChar.ToString()));
+                    }
                 }
             }
 
@@ -111,6 +114,48 @@ namespace Lexer {
             if (currentChar == ')') {
                 tokens.Add(new ParamToken(")", ParamType.CloseParam));
                 Step();
+            }
+        }
+
+        void ProcessAssignmentAndComparison() {
+            if (currentChar == '<') {
+                Step();
+                if (currentChar == '=') {
+                    tokens.Add(new ComparisonToken("<=", ComparisonType.LessThanOrEqual));
+                    Step();
+                } else {
+                    tokens.Add(new ComparisonToken("<", ComparisonType.LessThan));
+                }
+            }
+
+            if (currentChar == '>') {
+                Step();
+                if (currentChar == '=') { 
+                    tokens.Add(new ComparisonToken(">=", ComparisonType.GreaterThanOrEqual));
+                    Step();
+                } else {
+                    tokens.Add(new ComparisonToken(">", ComparisonType.GreaterThan));
+                }
+            }
+
+            if (currentChar == '=') {
+                if (Step() && currentChar == '=') { 
+                    tokens.Add(new ComparisonToken("==", ComparisonType.Equal));
+                    Step();
+                } else {
+                    tokens.Add(new AssignToken("="));
+                }
+            }
+
+            if (currentChar == '!') {
+                Step();
+                if (currentChar == '=') {
+                    tokens.Add(new ComparisonToken("!=", ComparisonType.NotEqual));
+                    Step();
+                } else {
+                    // Bool NOT operation here !
+                    throw new NotImplementedException();
+                }
             }
         }
     }

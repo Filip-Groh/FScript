@@ -1,11 +1,13 @@
 ﻿namespace Parser.ASTNodes {
     public class UnaryOperatorNode : AST {
-        public UnaryOperatorNode() { 
-        
+        public AST expression;
+
+        public UnaryOperatorNode(AST expression) { 
+            this.expression = expression;
         }
 
         public override string ToString() {
-            throw new NotImplementedException();
+            return $"[-{expression}]";
         }
     }
 }

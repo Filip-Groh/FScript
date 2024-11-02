@@ -23,7 +23,7 @@ namespace CLI {
             Lexer.Lexer lexer = new Lexer.Lexer(code);
             Token[] tokens = lexer.Tokenize();
 
-            Console.WriteLine(Token.ArrayToString(tokens));
+            Console.WriteLine(Utils.ArrayToString<Token>.ToString(tokens));
 
 
 
@@ -37,7 +37,7 @@ namespace CLI {
             Compiler.Compiler compiler = new Compiler.Compiler(abstractSyntaxTree);
             Bytecode[] bytecode = compiler.CompileToBytecode();
 
-            Console.WriteLine(Compiler.Compiler.ArrayToString(bytecode));
+            Console.WriteLine(Utils.ArrayToString<Bytecode>.ToString(bytecode, "\n"));
 
             if (runInterpreted) {
                 Interpreter.Interpreter interpreter = new Interpreter.Interpreter(bytecode);
