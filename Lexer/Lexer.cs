@@ -7,6 +7,7 @@ namespace Lexer {
 
         int currentCharIndex = -1;
         char currentChar;
+        bool lastCharReached = false;
 
         List<Token> tokens = new List<Token>();
 
@@ -19,31 +20,42 @@ namespace Lexer {
 
             if (currentCharIndex >= code.Length) {
                 currentCharIndex -= numberOfSteps;
+                lastCharReached = true;
                 return false;
             }
 
             currentChar = code[currentCharIndex];
+            lastCharReached = false;
             return true;
         }
 
         public Token[] Tokenize() {
             while (Step()) {
-                SkipWhitespace();
+                if (!lastCharReached) 
+                    SkipWhitespace();
 
-                ProcessOperator();
-                ProcessParam();
-                ProcessAssignmentAndComparison();
-
-                if (Char.IsAsciiLetter(currentChar)) { 
-                    ProcessIdentifier();
-                } else if (Char.IsAsciiDigit(currentChar)) {
-                    ProcessNumber();
-                } else {
-                    if (!Char.IsWhiteSpace(currentChar)) {
-                        tokens.Add(new Token(currentChar.ToString()));
+                if (!lastCharReached)
+                    ProcessOperator();
+                if (!lastCharReached)
+                    ProcessParam();
+                if (!lastCharReached)
+                    ProcessAssignmentAndComparison();
+                if (!lastCharReached)
+                    ProcessPunctuation();
+                if (!lastCharReached) {
+                    if (Char.IsAsciiLetter(currentChar)) {
+                        ProcessIdentifier();
+                    } else if (Char.IsAsciiDigit(currentChar)) {
+                        ProcessNumber();
+                    } else {
+                        if (!Char.IsWhiteSpace(currentChar)) {
+                            tokens.Add(new Token(currentChar.ToString()));
+                        }
                     }
                 }
             }
+
+            tokens.Add(new EOFToken());
 
             return tokens.ToArray();
         }
@@ -55,18 +67,29 @@ namespace Lexer {
             }
         }
 
+        void AddKeywordOrIdentifierToken(string currentIdentifier) {
+            switch (currentIdentifier) {
+                case "int":
+                    tokens.Add(new KeywordToken(currentIdentifier, Keywords.INT));
+                    break;
+                default:
+                    tokens.Add(new IdentifierToken(currentIdentifier));
+                    break;
+            }
+        }
+
         void ProcessIdentifier() {
             string currentIdentifier = "";
             while (Char.IsAsciiLetterOrDigit(currentChar)) {
                 currentIdentifier += currentChar;
                 if (!Step()) {
-                    tokens.Add(new Token(currentIdentifier));
+                    AddKeywordOrIdentifierToken(currentIdentifier);
                     return;
                 }
             }
 
             Step(-1);
-            tokens.Add(new Token(currentIdentifier));
+            AddKeywordOrIdentifierToken(currentIdentifier);
         }
 
         void ProcessNumber() {
@@ -156,6 +179,13 @@ namespace Lexer {
                     // Bool NOT operation here !
                     throw new NotImplementedException();
                 }
+            }
+        }
+
+        void ProcessPunctuation() {
+            if (currentChar == ';') {
+                tokens.Add(new SemicolonToken());
+                Step(); 
             }
         }
     }

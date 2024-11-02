@@ -29,6 +29,68 @@ namespace Parser {
         }
 
         public AST Parse() {
+            return Block();
+        }
+
+        AST Block() {
+            List<AST> statements = new List<AST>();
+            while (currentToken.GetType() != typeof(EOFToken)) {
+                statements.Add(Statement());
+            }
+            return new BlockNode(statements.ToArray());
+        }
+
+        AST Statement() {
+            if (currentToken.GetType() == typeof(KeywordToken) && ((KeywordToken)currentToken).keyword == Keywords.INT) {
+                Step();
+
+                if (currentToken.GetType() != typeof(IdentifierToken)) {
+                    throw new Exception("Syntax error!");
+                }
+
+                string name = ((IdentifierToken)currentToken).value;
+                Step();
+
+                if (currentToken.GetType() != typeof(AssignToken)) {
+                    throw new Exception("Syntax error!");
+                }
+
+                Step();
+
+                AST expression = Expression();
+
+                if (currentToken.GetType() != typeof(SemicolonToken)) {
+                    throw new Exception("Syntax Error!");
+                }
+
+                Step();
+                return new DeclarationNode(name, new AssignmentNode(name, expression));
+            }
+
+            if (currentToken.GetType() == typeof(IdentifierToken)) {
+                string name = ((IdentifierToken)currentToken).value;
+                Step();
+
+                if (currentToken.GetType() != typeof(AssignToken)) {
+                    throw new Exception("Syntax error!");
+                }
+
+                Step();
+
+                AST expression = Expression();
+
+                if (currentToken.GetType() != typeof(SemicolonToken)) {
+                    throw new Exception("Syntax Error!");
+                }
+
+                Step();
+                return new AssignmentNode(name, expression);
+            }
+
+            return Expression();
+        }
+
+        AST Expression() {
             return Equality();
         }
 
@@ -129,6 +191,12 @@ namespace Parser {
                     Step();
                     return expression;
                 }
+            }
+
+            if (currentToken.GetType() == typeof(IdentifierToken)) { 
+                string name = ((IdentifierToken)currentToken).value;
+                Step();
+                return new IdentifierNode(name);
             }
 
             throw new Exception("Nothing is here!");

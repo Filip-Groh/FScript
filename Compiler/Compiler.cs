@@ -2,6 +2,7 @@
 using Compiler.Bytecodes;
 using Parser;
 using Parser.ASTNodes;
+using System.Collections.Generic;
 
 namespace Compiler {
     struct NodeBytecode {
@@ -17,15 +18,17 @@ namespace Compiler {
     public class Compiler {
         public AST abstractSyntaxTree;
         int nextFreeRegister;
+        int nextFreeStack;
 
         public Compiler(AST abstractSyntaxTree) {
             this.abstractSyntaxTree = abstractSyntaxTree;
             
             nextFreeRegister = 0;
+            nextFreeStack = 0;
         }
 
         public Bytecode[] CompileToBytecode() {
-            NodeBytecode? bytecode = CompileNode(abstractSyntaxTree);
+            NodeBytecode? bytecode = CompileNode(abstractSyntaxTree, new Dictionary<string, int>());
 
             if (bytecode == null) {
                 throw new InvalidOperationException("Empty tree!");
@@ -38,8 +41,25 @@ namespace Compiler {
             return nextFreeRegister++;
         }
 
-        NodeBytecode? CompileNode(AST node) {
-            if (node.GetType() == typeof(NumberNode)) {
+        int AllocNextFreeStack() {
+            return nextFreeStack++;
+        }
+
+        NodeBytecode? CompileNode(AST node, Dictionary<string, int> variables) {
+            if (node.GetType() == typeof(BlockNode)) { 
+                BlockNode blockNode = (BlockNode)node;
+                List<Bytecode> blocks = new List<Bytecode>();
+
+                foreach (AST statement in blockNode.statements) {
+                    NodeBytecode? statementBytecode = CompileNode(statement, variables);
+
+                    if (statementBytecode != null) {
+                        blocks.AddRange(statementBytecode.Value.instructions);
+                    }
+                }
+
+                return new NodeBytecode(blocks.ToArray(), new Register(0));
+            } else if (node.GetType() == typeof(NumberNode)) {
                 NumberNode numberNode = (NumberNode)node;
 
                 Register register = new Register(AllocNextFreeRegister());
@@ -47,10 +67,23 @@ namespace Compiler {
                 Mov movInstruction = new Mov(register, immediate);
 
                 return new NodeBytecode(new Bytecode[] { movInstruction }, register);
+            } else if (node.GetType() == typeof(IdentifierNode)) {
+                IdentifierNode identifierNode = (IdentifierNode)node;
+
+                bool exists = variables.TryGetValue(identifierNode.name, out int relativeStackIndex);
+                if (!exists) {
+                    throw new Exception("Variable doesn't exists!");
+                }
+
+                Register register = new Register(AllocNextFreeRegister());
+                Stack stack = new Stack(relativeStackIndex);
+                Mov movInstruction = new Mov(register, stack);
+
+                return new NodeBytecode(new Bytecode[] { movInstruction }, register);
             } else if (node.GetType() == typeof(UnaryOperatorNode)) {
                 UnaryOperatorNode unaryOperatorNode = (UnaryOperatorNode)node;
 
-                NodeBytecode? expressionBrench = CompileNode(unaryOperatorNode.expression);
+                NodeBytecode? expressionBrench = CompileNode(unaryOperatorNode.expression, variables);
 
                 if (expressionBrench == null) {
                     throw new InvalidOperationException("Missing brench!");
@@ -66,8 +99,8 @@ namespace Compiler {
             } else if (node.GetType() == typeof(BinaryOperatorNode)) {
                 BinaryOperatorNode binaryOperatorNode = (BinaryOperatorNode)node;
 
-                NodeBytecode? leftBranch = CompileNode(binaryOperatorNode.left);
-                NodeBytecode? rightBranch = CompileNode(binaryOperatorNode.right);
+                NodeBytecode? leftBranch = CompileNode(binaryOperatorNode.left, variables);
+                NodeBytecode? rightBranch = CompileNode(binaryOperatorNode.right, variables);
 
                 if (leftBranch == null || rightBranch == null) {
                     throw new InvalidOperationException("Missing brench!");
@@ -96,11 +129,11 @@ namespace Compiler {
                 }
 
                 return new NodeBytecode(instructions, left.outputRegister);
-            } else if (node.GetType() == typeof(ComparisonNode)) { 
+            } else if (node.GetType() == typeof(ComparisonNode)) {
                 ComparisonNode comparisonNode = (ComparisonNode)node;
 
-                NodeBytecode? leftBranch = CompileNode(comparisonNode.left);
-                NodeBytecode? rightBranch = CompileNode(comparisonNode.right);
+                NodeBytecode? leftBranch = CompileNode(comparisonNode.left, variables);
+                NodeBytecode? rightBranch = CompileNode(comparisonNode.right, variables);
 
                 if (leftBranch == null || rightBranch == null) {
                     throw new InvalidOperationException("Missing brench!");
@@ -142,6 +175,35 @@ namespace Compiler {
                 }
 
                 return new NodeBytecode(instructions, register);
+            } else if (node.GetType() == typeof(DeclarationNode)) {
+                DeclarationNode declarationNode = (DeclarationNode)node;
+
+                variables.Add(declarationNode.name, AllocNextFreeStack());
+
+                if (declarationNode.inicializationNode is not null) {
+                    return CompileNode(declarationNode.inicializationNode, variables);
+                }
+            } else if (node.GetType() == typeof(AssignmentNode)) { 
+                AssignmentNode assignmentNode = (AssignmentNode)node;
+                bool exists = variables.TryGetValue(assignmentNode.name, out int relativeStackIndex);
+                if (!exists) {
+                    throw new Exception("Variable doesn't exists!");
+                }
+
+                NodeBytecode? expressionBranch = CompileNode(assignmentNode.expression, variables);
+
+                if (expressionBranch == null) {
+                    throw new InvalidOperationException("Missing expression!");
+                }
+
+                NodeBytecode expression = (NodeBytecode)expressionBranch;
+
+                Bytecode[] instructions = new Bytecode[expression.instructions.Length + 1];
+                expression.instructions.CopyTo(instructions, 0);
+                Stack stack = new Stack(relativeStackIndex);
+
+                instructions[instructions.Length - 1] = new Mov(stack, expression.outputRegister);
+                return new NodeBytecode(instructions, expression.outputRegister);
             }
             return null;
         }

@@ -2,16 +2,16 @@
 
 namespace Compiler.Bytecodes {
     public class Mov : Bytecode {
-        public Register destination;
+        public Argument destination;
         public Argument source;
 
-        public Mov(Register register, Immediate value) {
+        public Mov(Register register, Argument value) {
             destination = register;
             source = value;
         }
 
-        public Mov(Register register, Register value) {
-            destination = register;
+        public Mov(Stack stack, Argument value) {
+            destination = stack;
             source = value;
         }
 

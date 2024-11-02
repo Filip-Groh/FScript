@@ -5,15 +5,21 @@ using Compiler.Bytecodes;
 namespace Interpreter {
     public class Interpreter {
         public Bytecode[] bytecode;
+
         Dictionary<int, int> registers;
+        List<int> stack;
+
         bool zeroFlag;
         bool signFlag;
         bool overflowFlag;
+
+        int stackBase;
 
         public Interpreter(Bytecode[] bytecode) { 
             this.bytecode = bytecode;
 
             registers = new Dictionary<int, int>();
+            stack = new List<int>();
         }
 
         public void Execute() {
@@ -57,7 +63,7 @@ namespace Interpreter {
             flags += $"ZeroFlag: {zeroFlag}" + "\n";
             flags += $"SignFlag: {signFlag}" + "\n";
             flags += $"OverflowFlag: {overflowFlag}" + "\n";
-            return $"{flags}\n{RegistersToString()}";
+            return $"{flags}\n{RegistersToString()}\n{String.Join("\n", stack)}";
         }
 
         int GetValueFromArgument(Argument argument) {
@@ -65,13 +71,25 @@ namespace Interpreter {
                 return ((Immediate)argument).value;
             } else if (argument.GetType() == typeof(Register)) {
                 return registers[((Register)argument).registerIndex];
+            } else if (argument.GetType() == typeof(Stack)) {
+                return stack[stackBase + ((Stack)argument).relativeIndex];
             }
 
             throw new Exception("Wrong argument!");
         }
 
         void ProcessMovInstruction(Mov movInstruction) {
-            registers[movInstruction.destination.registerIndex] = GetValueFromArgument(movInstruction.source);
+            if (movInstruction.destination.GetType() == typeof(Register)) {
+                registers[((Register)movInstruction.destination).registerIndex] = GetValueFromArgument(movInstruction.source);
+            } else if (movInstruction.destination.GetType() == typeof(Stack)) {
+                int relativeIndex = ((Stack)movInstruction.destination).relativeIndex;
+
+                while (stack.Count <= stackBase + relativeIndex) {
+                    stack.Add(0);
+                }
+
+                stack[stackBase + relativeIndex] = GetValueFromArgument(movInstruction.source);
+            }
         }
 
         void ProcessAddInstruction(Add addInstruction) {

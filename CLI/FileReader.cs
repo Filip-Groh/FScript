@@ -19,7 +19,7 @@
                 }
 
                 return fileContent;
-            } catch (Exception e) {
+            } catch (Exception) {
                 return null;
             }
         }
