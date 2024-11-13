@@ -2,7 +2,6 @@
 using Compiler.Bytecodes;
 using Parser;
 using Parser.ASTNodes;
-using System.Collections.Generic;
 
 namespace Compiler {
     struct NodeBytecode {
@@ -46,7 +45,7 @@ namespace Compiler {
         }
 
         NodeBytecode? CompileNode(AST node, Dictionary<string, int> variables) {
-            if (node.GetType() == typeof(BlockNode)) { 
+            if (node.GetType() == typeof(BlockNode)) {
                 BlockNode blockNode = (BlockNode)node;
                 List<Bytecode> blocks = new List<Bytecode>();
 
@@ -99,15 +98,15 @@ namespace Compiler {
             } else if (node.GetType() == typeof(BinaryOperatorNode)) {
                 BinaryOperatorNode binaryOperatorNode = (BinaryOperatorNode)node;
 
-                NodeBytecode? leftBranch = CompileNode(binaryOperatorNode.left, variables);
-                NodeBytecode? rightBranch = CompileNode(binaryOperatorNode.right, variables);
+                NodeBytecode? leftBrench = CompileNode(binaryOperatorNode.left, variables);
+                NodeBytecode? rightBrench = CompileNode(binaryOperatorNode.right, variables);
 
-                if (leftBranch == null || rightBranch == null) {
+                if (leftBrench == null || rightBrench == null) {
                     throw new InvalidOperationException("Missing brench!");
                 }
 
-                NodeBytecode left = (NodeBytecode)leftBranch;
-                NodeBytecode right = (NodeBytecode)rightBranch;
+                NodeBytecode left = (NodeBytecode)leftBrench;
+                NodeBytecode right = (NodeBytecode)rightBrench;
 
                 Bytecode[] instructions = new Bytecode[left.instructions.Length + right.instructions.Length + 1];
                 left.instructions.CopyTo(instructions, 0);
@@ -132,15 +131,15 @@ namespace Compiler {
             } else if (node.GetType() == typeof(ComparisonNode)) {
                 ComparisonNode comparisonNode = (ComparisonNode)node;
 
-                NodeBytecode? leftBranch = CompileNode(comparisonNode.left, variables);
-                NodeBytecode? rightBranch = CompileNode(comparisonNode.right, variables);
+                NodeBytecode? leftBrench = CompileNode(comparisonNode.left, variables);
+                NodeBytecode? rightBrench = CompileNode(comparisonNode.right, variables);
 
-                if (leftBranch == null || rightBranch == null) {
+                if (leftBrench == null || rightBrench == null) {
                     throw new InvalidOperationException("Missing brench!");
                 }
 
-                NodeBytecode left = (NodeBytecode)leftBranch;
-                NodeBytecode right = (NodeBytecode)rightBranch;
+                NodeBytecode left = (NodeBytecode)leftBrench;
+                NodeBytecode right = (NodeBytecode)rightBrench;
 
                 Bytecode[] instructions = new Bytecode[left.instructions.Length + right.instructions.Length + 2];
                 left.instructions.CopyTo(instructions, 0);
@@ -175,6 +174,33 @@ namespace Compiler {
                 }
 
                 return new NodeBytecode(instructions, register);
+            } else if (node.GetType() == typeof(ConditionNode)) {
+                ConditionNode conditionNode = (ConditionNode)node;
+
+                NodeBytecode? leftBrench = CompileNode(conditionNode.left, variables);
+                NodeBytecode? rightBrench = CompileNode(conditionNode.right, variables);
+
+                if (leftBrench == null || rightBrench == null) {
+                    throw new InvalidOperationException("Missing brench!");
+                }
+
+                NodeBytecode left = (NodeBytecode)leftBrench;
+                NodeBytecode right = (NodeBytecode)rightBrench;
+
+                Bytecode[] instructions = new Bytecode[left.instructions.Length + right.instructions.Length + 1];
+                left.instructions.CopyTo(instructions, 0);
+                right.instructions.CopyTo(instructions, left.instructions.Length);
+
+                switch (conditionNode.condition) {
+                    case ConditionType.AND:
+                        instructions[instructions.Length - 1] = new And(left.outputRegister, right.outputRegister);
+                        break;
+                    case ConditionType.OR:
+                        instructions[instructions.Length - 1] = new Or(left.outputRegister, right.outputRegister);
+                        break;
+                }
+
+                return new NodeBytecode(instructions, left.outputRegister);
             } else if (node.GetType() == typeof(DeclarationNode)) {
                 DeclarationNode declarationNode = (DeclarationNode)node;
 
@@ -190,13 +216,13 @@ namespace Compiler {
                     throw new Exception("Variable doesn't exists!");
                 }
 
-                NodeBytecode? expressionBranch = CompileNode(assignmentNode.expression, variables);
+                NodeBytecode? expressionBrench = CompileNode(assignmentNode.expression, variables);
 
-                if (expressionBranch == null) {
+                if (expressionBrench == null) {
                     throw new InvalidOperationException("Missing expression!");
                 }
 
-                NodeBytecode expression = (NodeBytecode)expressionBranch;
+                NodeBytecode expression = (NodeBytecode)expressionBrench;
 
                 Bytecode[] instructions = new Bytecode[expression.instructions.Length + 1];
                 expression.instructions.CopyTo(instructions, 0);

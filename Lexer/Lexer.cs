@@ -42,6 +42,8 @@ namespace Lexer {
                     ProcessAssignmentAndComparison();
                 if (!lastCharReached)
                     ProcessPunctuation();
+                if (!lastCharReached)
+                    ProcessConditionsAndBitwise();
                 if (!lastCharReached) {
                     if (Char.IsAsciiLetter(currentChar)) {
                         ProcessIdentifier();
@@ -176,8 +178,7 @@ namespace Lexer {
                     tokens.Add(new ComparisonToken("!=", ComparisonType.NotEqual));
                     Step();
                 } else {
-                    // Bool NOT operation here !
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Bool NOT operation isn't implemented YET!");
                 }
             }
         }
@@ -186,6 +187,28 @@ namespace Lexer {
             if (currentChar == ';') {
                 tokens.Add(new SemicolonToken());
                 Step(); 
+            }
+        }
+
+        void ProcessConditionsAndBitwise() {
+            if (currentChar == '&') {
+                Step();
+                if (currentChar == '&') {
+                    tokens.Add(new ConditionToken("&&", ConditionType.AND));
+                    Step();
+                } else {
+                    throw new NotImplementedException("Bitwise AND operation isn't implemented YET!");
+                }
+            }
+
+            if (currentChar == '|') {
+                Step();
+                if (currentChar == '|') {
+                    tokens.Add(new ConditionToken("||", ConditionType.OR));
+                    Step();
+                } else {
+                    throw new NotImplementedException("Bitwise OR operation isn't implemented YET!");
+                }
             }
         }
     }

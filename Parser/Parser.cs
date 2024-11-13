@@ -91,7 +91,25 @@ namespace Parser {
         }
 
         AST Expression() {
-            return Equality();
+            return ConditionalOR();
+        }
+
+        AST ConditionalOR() {
+            AST left = ConditionalAND();
+            if (currentToken.GetType() == typeof(ConditionToken) && ((ConditionToken)currentToken).type == Lexer.Tokens.StaticTokens.ConditionType.OR) {
+                Step();
+                return new ConditionNode(ASTNodes.ConditionType.OR, left, ConditionalAND());
+            }
+            return left;
+        }
+
+        AST ConditionalAND() {
+            AST left = Equality();
+            if (currentToken.GetType() == typeof(ConditionToken) && ((ConditionToken)currentToken).type == Lexer.Tokens.StaticTokens.ConditionType.AND) {
+                Step();
+                return new ConditionNode(ASTNodes.ConditionType.AND, left, Equality());
+            }
+            return left;
         }
 
         AST Equality() {

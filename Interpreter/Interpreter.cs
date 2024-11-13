@@ -40,6 +40,10 @@ namespace Interpreter {
                     ProcessCmpInstruction((Cmp)instruction);
                 else if (instruction.GetType() == typeof(Set))
                     ProcessSetInstruction((Set)instruction);
+                else if (instruction.GetType() == typeof(And))
+                    ProcessAndInstruction((And)instruction);
+                else if (instruction.GetType() == typeof(Or))
+                    ProcessOrInstruction((Or)instruction);
                 else
                     throw new Exception("Unknown bytecode!");
             }
@@ -151,6 +155,14 @@ namespace Interpreter {
                     break;
             }
             registers[setInstruction.destination.registerIndex] = conditionMet ? 1 : 0;
+        }
+
+        void ProcessAndInstruction(And andInstruction) {
+            registers[andInstruction.destination.registerIndex] &= GetValueFromArgument(andInstruction.source);
+        }
+
+        void ProcessOrInstruction(Or orInstruction) {
+            registers[orInstruction.destination.registerIndex] |= GetValueFromArgument(orInstruction.source);
         }
     }
 }
