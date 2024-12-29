@@ -125,6 +125,10 @@ namespace Compiler {
                     case BinaryOperation.Divide:
                         instructions[instructions.Length - 1] = new Div(left.outputRegister, right.outputRegister);
                         break;
+                    case BinaryOperation.Modulo:
+                        Register register = new Register(AllocNextFreeRegister());
+                        instructions[instructions.Length - 1] = new Div(left.outputRegister, register, right.outputRegister);
+                        return new NodeBytecode(instructions, register);
                 }
 
                 return new NodeBytecode(instructions, left.outputRegister);

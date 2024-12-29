@@ -128,6 +128,11 @@ namespace Lexer {
                 tokens.Add(new OperatorToken("/", OperatorType.Divide));
                 Step();
             }
+
+            if (currentChar == '%') {
+                tokens.Add(new OperatorToken("%", OperatorType.Modulo));
+                Step();
+            }
         }
 
         void ProcessParam() {

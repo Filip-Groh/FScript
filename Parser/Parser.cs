@@ -215,7 +215,7 @@ namespace Parser {
 
         AST Multiplicative() {
             AST left = Unary();
-            while (currentToken.GetType() == typeof(OperatorToken) && (((OperatorToken)currentToken).type == OperatorType.Multiply || ((OperatorToken)currentToken).type == OperatorType.Divide)) {
+            while (currentToken.GetType() == typeof(OperatorToken) && (((OperatorToken)currentToken).type == OperatorType.Multiply || ((OperatorToken)currentToken).type == OperatorType.Divide || ((OperatorToken)currentToken).type == OperatorType.Modulo)) {
                 OperatorToken currentOperatorToken = (OperatorToken)currentToken;
                 switch (currentOperatorToken.type) {
                     case OperatorType.Multiply:
@@ -225,6 +225,10 @@ namespace Parser {
                     case OperatorType.Divide:
                         Step();
                         left = new BinaryOperatorNode(BinaryOperation.Divide, left, Unary());
+                        break;
+                    case OperatorType.Modulo:
+                        Step();
+                        left = new BinaryOperatorNode(BinaryOperation.Modulo, left, Unary());
                         break;
                 }
             }

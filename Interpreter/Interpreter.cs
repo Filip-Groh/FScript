@@ -115,6 +115,9 @@ namespace Interpreter {
         }
 
         void ProcessDivInstruction(Div divInstruction) {
+            if (divInstruction.remainderDestination != null) {
+                registers[divInstruction.remainderDestination.registerIndex] = registers[divInstruction.destination.registerIndex] % GetValueFromArgument(divInstruction.source);
+            }
             registers[divInstruction.destination.registerIndex] /= GetValueFromArgument(divInstruction.source);
         }
 

@@ -1,8 +1,5 @@
-Operators:
-- Modulo
-
 Logical operators:
-- NOT operator
+- NOT operator (Xor operand)
 
 Tests:
 - Lexer tests

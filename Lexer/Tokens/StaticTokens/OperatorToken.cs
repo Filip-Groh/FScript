@@ -3,7 +3,8 @@
         Plus,
         Minus,
         Multiply,
-        Divide
+        Divide,
+        Modulo
     }
 
     public class OperatorToken : StaticToken {

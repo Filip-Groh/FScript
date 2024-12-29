@@ -3,7 +3,8 @@
         Plus,
         Minus,
         Multiply,
-        Divide
+        Divide,
+        Modulo
     }
 
     public class BinaryOperatorNode : AST {
@@ -27,6 +28,8 @@
                     return "*";
                 case BinaryOperation.Divide:
                     return "/";
+                case BinaryOperation.Modulo:
+                    return "%";
                 default: return "";
             }
         }
