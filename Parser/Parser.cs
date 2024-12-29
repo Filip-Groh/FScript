@@ -236,9 +236,24 @@ namespace Parser {
         }
 
         AST Unary() {
-            if (currentToken.GetType() == typeof(OperatorToken) && ((OperatorToken)currentToken).type == OperatorType.Minus) {
+            bool isNOT = false;
+            while (currentToken.GetType() == typeof(ConditionToken) && ((ConditionToken)currentToken).type == Lexer.Tokens.StaticTokens.ConditionType.NOT) {
+                isNOT = !isNOT;
                 Step();
-                return new UnaryOperatorNode(Primary());
+            }
+
+            if (isNOT) {
+                return new UnaryOperatorNode(UnaryOperationType.Not, Primary());
+            }
+
+            bool isNEG = false;
+            while (currentToken.GetType() == typeof(OperatorToken) && ((OperatorToken)currentToken).type == OperatorType.Minus) {
+                isNEG = !isNEG;
+                Step();
+            }
+
+            if (isNEG) {
+                return new UnaryOperatorNode(UnaryOperationType.Negation, Primary());
             }
 
             return Primary(); 
@@ -253,7 +268,7 @@ namespace Parser {
 
             if (currentToken.GetType() == typeof(ParamToken) && ((ParamToken)currentToken).type == ParamType.OpenParam) {
                 Step();
-                AST expression = Additive();
+                AST expression = Expression();
                 if (currentToken.GetType() == typeof(ParamToken) && ((ParamToken)currentToken).type == ParamType.CloseParam) {
                     Step();
                     return expression;

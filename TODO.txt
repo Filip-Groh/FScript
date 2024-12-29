@@ -1,6 +1,3 @@
-Logical operators:
-- NOT operator (Xor operand)
-
 Tests:
 - Lexer tests
 - Parser tests

@@ -92,7 +92,15 @@ namespace Compiler {
 
                 Bytecode[] instructions = new Bytecode[expression.instructions.Length + 1];
                 expression.instructions.CopyTo(instructions, 0);
-                instructions[instructions.Length - 1] = new Neg(expression.outputRegister);
+
+                switch (unaryOperatorNode.operation) {
+                    case UnaryOperationType.Negation:
+                        instructions[instructions.Length - 1] = new Neg(expression.outputRegister);
+                        break;
+                    case UnaryOperationType.Not:
+                        instructions[instructions.Length - 1] = new Xor(expression.outputRegister, new Immediate(1));
+                        break;
+                }
 
                 return new NodeBytecode(instructions, expression.outputRegister);
             } else if (node.GetType() == typeof(BinaryOperatorNode)) {

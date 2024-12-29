@@ -69,11 +69,18 @@ namespace Interpreter {
         }
 
         public override string ToString() {
-            string flags = string.Empty;
-            flags += $"ZeroFlag: {zeroFlag}" + "\n";
-            flags += $"SignFlag: {signFlag}" + "\n";
-            flags += $"OverflowFlag: {overflowFlag}" + "\n";
-            return $"{flags}\n{RegistersToString()}\n{String.Join("\n", stack)}";
+            string flagsString = "Flags:" + "\n";
+            flagsString += $"ZeroFlag: {zeroFlag}" + "\n";
+            flagsString += $"SignFlag: {signFlag}" + "\n";
+            flagsString += $"OverflowFlag: {overflowFlag}" + "\n";
+
+            string registersString = "Registers:" + "\n";
+            registersString += RegistersToString() + "\n";
+
+            string stackString = "Stack:" + "\n";
+            stackString += String.Join("\n", stack);
+
+            return $"{flagsString}\n{registersString}\n{stackString}";
         }
 
         int GetValueFromArgument(Argument argument) {

@@ -1,7 +1,8 @@
 ﻿namespace Lexer.Tokens.StaticTokens {
     public enum ConditionType {
         AND,
-        OR
+        OR,
+        NOT
     }
 
     public class ConditionToken : StaticToken {
