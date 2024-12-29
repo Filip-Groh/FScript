@@ -1,13 +1,16 @@
 ﻿namespace Lexer.Tokens.StaticTokens
 {
-    public enum Keywords {
-        INT
+    public enum KeywordType {
+        INT,
+        IF,
+        ELSE
     }
 
-    public class KeywordToken : StaticToken {
-        public Keywords keyword;
-        public KeywordToken(string text, Keywords keyword) : base(text) {
-            this.keyword = keyword;
+    public class KeywordToken : StaticToken, ITyped<KeywordType> {
+        public KeywordType type {  get; set; }
+
+        public KeywordToken(string text, KeywordType keyword) : base(text) {
+            this.type = keyword;
         }
     }
 }

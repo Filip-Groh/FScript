@@ -6,8 +6,8 @@
         LeftShift,
         RightShift
     }
-    public class BitwiseOperatorToken : StaticToken {
-        public BitwiseOperatorType type;
+    public class BitwiseOperatorToken : StaticToken, ITyped<BitwiseOperatorType> {
+        public BitwiseOperatorType type { get; set; }
 
         public BitwiseOperatorToken(string text, BitwiseOperatorType type) : base(text) {
             this.type = type;

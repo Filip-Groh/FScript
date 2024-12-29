@@ -1,13 +1,15 @@
 ﻿namespace Lexer.Tokens.StaticTokens {
-    public enum ParamType {
-        OpenParam,
-        CloseParam
+    public enum BracketType {
+        OpenParentheses,
+        CloseParentheses,
+        OpenCurlyBraces,
+        CloseCurlyBraces,
     }
 
-    public class ParamToken : StaticToken {
-        public ParamType type;
+    public class BracketToken : StaticToken, ITyped<BracketType> {
+        public BracketType type { get; set; }
 
-        public ParamToken(string text, ParamType type) : base(text) {
+        public BracketToken(string text, BracketType type) : base(text) {
             this.type = type;
         }
     }

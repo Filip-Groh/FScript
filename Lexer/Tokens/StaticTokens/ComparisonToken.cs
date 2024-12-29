@@ -8,8 +8,8 @@
         GreaterThanOrEqual
     }
 
-    public class ComparisonToken : StaticToken {
-        public ComparisonType type;
+    public class ComparisonToken : StaticToken, ITyped<ComparisonType> {
+        public ComparisonType type { get; set; }
 
         public ComparisonToken(string text, ComparisonType type) : base(text) { 
             this.type = type;

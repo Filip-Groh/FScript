@@ -38,11 +38,19 @@ namespace Lexer {
 
 
                 if (currentChar == '(') {
-                    tokens.Add(new ParamToken("(", ParamType.OpenParam));
+                    tokens.Add(new BracketToken("(", BracketType.OpenParentheses));
                     continue;
                 }
                 if (currentChar == ')') {
-                    tokens.Add(new ParamToken(")", ParamType.CloseParam));
+                    tokens.Add(new BracketToken(")", BracketType.CloseParentheses));
+                    continue;
+                }
+                if (currentChar == '{') {
+                    tokens.Add(new BracketToken("{", BracketType.OpenCurlyBraces));
+                    continue;
+                }
+                if (currentChar == '}') {
+                    tokens.Add(new BracketToken("}", BracketType.CloseCurlyBraces));
                     continue;
                 }
 
@@ -171,7 +179,13 @@ namespace Lexer {
         void AddKeywordOrIdentifierToken(string currentIdentifier) {
             switch (currentIdentifier) {
                 case "int":
-                    tokens.Add(new KeywordToken(currentIdentifier, Keywords.INT));
+                    tokens.Add(new KeywordToken(currentIdentifier, KeywordType.INT));
+                    break;
+                case "if":
+                    tokens.Add(new KeywordToken(currentIdentifier, KeywordType.IF));
+                    break;
+                case "else":
+                    tokens.Add(new KeywordToken(currentIdentifier, KeywordType.ELSE));
                     break;
                 default:
                     tokens.Add(new IdentifierToken(currentIdentifier));

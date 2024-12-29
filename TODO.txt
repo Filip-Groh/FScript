@@ -1,14 +1,103 @@
-Tests:
-- Lexer tests
-- Parser tests
-- Compiler tests
-- Interpreter tests
-
-Just-in-time:
-- Compiling into ASM
-
 Features:
 - Limited Register count
 - JIT
 - Types
 - Errors
+- Optimizer
+- Tests
+
+Language:
+- Direct assignments (+=, -=, *=, /=, %=, <<=, >>=, &=, |=, ^=)
+- Scope ({})
+- If, else if, else statements
+- Loop, While loop, For loop
+- Break, Continue, Return
+- Functions
+
+Loops:
+
+loop:
+loop_start:
+	...
+	jump loop_start
+loop_end:
+
+(continue = jump loop_start)
+(break = jump loop_end)
+
+
+do while:
+do_while_body:
+	...
+do_while_condition:
+	condition
+	jump_true do_white_body
+do_while_end:
+
+(continue = jump do_while_condition)
+(break = jump_do_while_end)
+
+
+while:
+	jump while_condition
+while_body:
+	...
+while_condition:
+	condition
+	jump_true while_body
+while_end: 
+
+(continue = jump while_condition)
+(break = jump while_end)
+
+
+for loop:
+	init
+	jump for_condition
+for_body:
+	... 
+	update
+for_condition:
+	condition
+	jump_true for_body
+for_end:
+
+(continue = jump for_condition)
+(break = jump for_end)
+
+
+
+Statements:
+
+if:
+	condition
+	jump_false if_end
+	...
+if_end:
+
+
+
+if else:
+	condition
+	jump_false if_else
+	... (main)
+	jump if_end
+if_else:
+	... (else)
+if_end:
+
+
+
+if else if else:
+	condition #1
+	jump_false else_if
+	... (main 1#)
+	jump else_if_end
+else_if:
+	condition #2
+	jump_false else
+	... (main 2#)
+	jump else_if_end
+else:
+	... (else)
+else_if_end:

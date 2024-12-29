@@ -1,30 +1,55 @@
 ﻿using Compiler;
 using Compiler.Arguments;
 using Compiler.Bytecodes;
+using Lexer;
 
 namespace Interpreter {
     public class Interpreter {
         public Bytecode[] bytecode;
+        Bytecode instruction;
 
         Dictionary<int, int> registers;
         List<int> stack;
+        Dictionary<string, int> labels;
 
         bool zeroFlag;
         bool signFlag;
         bool overflowFlag;
 
         int stackBase;
+        int programCounter;
 
         public Interpreter(Bytecode[] bytecode) { 
             this.bytecode = bytecode;
+            instruction = bytecode[0];
+
+            stackBase = 0;
+            programCounter = -1;
 
             registers = new Dictionary<int, int>();
             stack = new List<int>();
+            labels = new Dictionary<string, int>();
+
+            LoadLabels();
+        }
+
+        bool Step(int numberOfSteps = 1) {
+            programCounter += numberOfSteps;
+
+            if (programCounter >= bytecode.Length) {
+                programCounter -= numberOfSteps;
+                return false;
+            }
+
+            instruction = bytecode[programCounter];
+            return true;
         }
 
         public void Execute() {
-            foreach (Bytecode instruction in bytecode) {
-                if (instruction.GetType() == typeof(Mov))
+            while (Step()) {
+                if (instruction.GetType() == typeof(Label))
+                    continue;
+                else if (instruction.GetType() == typeof(Mov))
                     ProcessMovInstruction((Mov)instruction);
                 else if (instruction.GetType() == typeof(Add))
                     ProcessAddInstruction((Add)instruction);
@@ -44,14 +69,28 @@ namespace Interpreter {
                     ProcessAndInstruction((And)instruction);
                 else if (instruction.GetType() == typeof(Or))
                     ProcessOrInstruction((Or)instruction);
-                else if (instruction.GetType() == typeof(Xor)) 
+                else if (instruction.GetType() == typeof(Xor))
                     ProcessXorInstruction((Xor)instruction);
                 else if (instruction.GetType() == typeof(Sal))
                     ProcessSalInstruction((Sal)instruction);
                 else if (instruction.GetType() == typeof(Sar))
                     ProcessSarInstruction((Sar)instruction);
+                else if (instruction.GetType() == typeof(J))
+                    ProcessJInstruction((J)instruction);
+                else if (instruction.GetType() == typeof(Jmp))
+                    ProcessJmpInstruction((Jmp)instruction);
                 else
                     throw new Exception("Unknown bytecode!");
+            }
+        }
+
+        void LoadLabels() {
+            for (int i = 0; i < bytecode.Length; i++) {
+                if (bytecode[i].GetType() != typeof(Label))
+                    continue;
+
+                Label label = (Label)bytecode[i];
+                labels.Add(label.name, i);
             }
         }
 
@@ -93,6 +132,31 @@ namespace Interpreter {
             }
 
             throw new Exception("Wrong argument!");
+        }
+
+        bool ResolveCondition(Condition condition) {
+            bool conditionMet = false;
+            switch (condition) {
+                case Condition.Equal:
+                    conditionMet = zeroFlag;
+                    break;
+                case Condition.NotEqual:
+                    conditionMet = !zeroFlag;
+                    break;
+                case Condition.LessThan:
+                    conditionMet = signFlag != overflowFlag;
+                    break;
+                case Condition.LessThanOrEqual:
+                    conditionMet = zeroFlag || signFlag != overflowFlag;
+                    break;
+                case Condition.GreaterThan:
+                    conditionMet = zeroFlag && signFlag == overflowFlag;
+                    break;
+                case Condition.GreaterThanOrEqual:
+                    conditionMet = signFlag == overflowFlag;
+                    break;
+            }
+            return conditionMet;
         }
 
         void ProcessMovInstruction(Mov movInstruction) {
@@ -149,28 +213,7 @@ namespace Interpreter {
         }
 
         void ProcessSetInstruction(Set setInstruction) {
-            bool conditionMet = false;
-            switch (setInstruction.condition) {
-                case Condition.Equal:
-                    conditionMet = zeroFlag;
-                    break;
-                case Condition.NotEqual:
-                    conditionMet = !zeroFlag;
-                    break;
-                case Condition.LessThan:
-                    conditionMet = signFlag != overflowFlag;
-                    break;
-                case Condition.LessThanOrEqual:
-                    conditionMet = zeroFlag || signFlag != overflowFlag;
-                    break;
-                case Condition.GreaterThan:
-                    conditionMet = zeroFlag && signFlag == overflowFlag;
-                    break;
-                case Condition.GreaterThanOrEqual:
-                    conditionMet = signFlag == overflowFlag;
-                    break;
-            }
-            registers[setInstruction.destination.registerIndex] = conditionMet ? 1 : 0;
+            registers[setInstruction.destination.registerIndex] = ResolveCondition(setInstruction.condition) ? 1 : 0;
         }
 
         void ProcessAndInstruction(And andInstruction) {
@@ -191,6 +234,25 @@ namespace Interpreter {
 
         void ProcessSarInstruction(Sar sarInstruction) {
             registers[sarInstruction.destination.registerIndex] >>= GetValueFromArgument(sarInstruction.source);
+        }
+
+        void ProcessJInstruction(J jInstruction) {
+            if (!ResolveCondition(jInstruction.condition))
+                return;
+
+            if (!labels.TryGetValue(jInstruction.label, out int address)) {
+                throw new InvalidOperationException("Jumping to unknown label");
+            }
+
+            programCounter = address;
+        }
+
+        void ProcessJmpInstruction(Jmp jmpInstruction) {
+            if (!labels.TryGetValue(jmpInstruction.label, out int address)) {
+                throw new InvalidOperationException("Jumping to unknown label");
+            }
+
+            programCounter = address;
         }
     }
 }
