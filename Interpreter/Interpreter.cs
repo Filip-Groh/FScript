@@ -44,6 +44,12 @@ namespace Interpreter {
                     ProcessAndInstruction((And)instruction);
                 else if (instruction.GetType() == typeof(Or))
                     ProcessOrInstruction((Or)instruction);
+                else if (instruction.GetType() == typeof(Xor)) 
+                    ProcessXorInstruction((Xor)instruction);
+                else if (instruction.GetType() == typeof(Sal))
+                    ProcessSalInstruction((Sal)instruction);
+                else if (instruction.GetType() == typeof(Sar))
+                    ProcessSarInstruction((Sar)instruction);
                 else
                     throw new Exception("Unknown bytecode!");
             }
@@ -163,6 +169,18 @@ namespace Interpreter {
 
         void ProcessOrInstruction(Or orInstruction) {
             registers[orInstruction.destination.registerIndex] |= GetValueFromArgument(orInstruction.source);
+        }
+
+        void ProcessXorInstruction(Xor xorInstruction) {
+            registers[xorInstruction.destination.registerIndex] ^= GetValueFromArgument(xorInstruction.source);
+        }
+
+        void ProcessSalInstruction(Sal salInstruction) {
+            registers[salInstruction.destination.registerIndex] <<= GetValueFromArgument(salInstruction.source);
+        }
+
+        void ProcessSarInstruction(Sar sarInstruction) {
+            registers[sarInstruction.destination.registerIndex] >>= GetValueFromArgument(sarInstruction.source);
         }
     }
 }

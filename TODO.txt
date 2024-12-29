@@ -1,0 +1,20 @@
+Operators:
+- Modulo
+
+Logical operators:
+- NOT operator
+
+Tests:
+- Lexer tests
+- Parser tests
+- Compiler tests
+- Interpreter tests
+
+Just-in-time:
+- Compiling into ASM
+
+Features:
+- Limited Register count
+- JIT
+- Types
+- Errors

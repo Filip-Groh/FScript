@@ -104,10 +104,37 @@ namespace Parser {
         }
 
         AST ConditionalAND() {
-            AST left = Equality();
+            AST left = BitwiseOR();
             if (currentToken.GetType() == typeof(ConditionToken) && ((ConditionToken)currentToken).type == Lexer.Tokens.StaticTokens.ConditionType.AND) {
                 Step();
-                return new ConditionNode(ASTNodes.ConditionType.AND, left, Equality());
+                return new ConditionNode(ASTNodes.ConditionType.AND, left, BitwiseOR());
+            }
+            return left;
+        }
+
+        AST BitwiseOR() {
+            AST left = BitwiseXOR();
+            if (currentToken.GetType() == typeof(BitwiseOperatorToken) && ((BitwiseOperatorToken)currentToken).type == BitwiseOperatorType.OR) {  
+                Step();
+                return new BitwiseOperatorNode(BitwiseOperation.OR, left, BitwiseXOR());
+            }
+            return left;
+        }
+
+        AST BitwiseXOR() {
+            AST left = BitwiseAND();
+            if (currentToken.GetType() == typeof(BitwiseOperatorToken) && ((BitwiseOperatorToken)currentToken).type == BitwiseOperatorType.XOR) {
+                Step();
+                return new BitwiseOperatorNode(BitwiseOperation.XOR, left, BitwiseAND());
+            }
+            return left;
+        }
+
+        AST BitwiseAND() {
+            AST left = Equality();
+            if (currentToken.GetType() == typeof(BitwiseOperatorToken) && ((BitwiseOperatorToken)currentToken).type == BitwiseOperatorType.AND) {
+                Step();
+                return new BitwiseOperatorNode(BitwiseOperation.AND, left, Equality());
             }
             return left;
         }
@@ -127,7 +154,7 @@ namespace Parser {
         }
 
         AST Relational() {
-            AST left = Additive();
+            AST left = Shift();
             if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.LessThan) {
                 Step();
                 return new ComparisonNode(Comparison.LessThan, left, Relational());
@@ -146,6 +173,24 @@ namespace Parser {
             if (currentToken.GetType() == typeof(ComparisonToken) && ((ComparisonToken)currentToken).type == ComparisonType.GreaterThanOrEqual) {
                 Step();
                 return new ComparisonNode(Comparison.GreaterThanOrEqual, left, Relational());
+            }
+            return left;
+        }
+
+        AST Shift() {
+            AST left = Additive();
+            while (currentToken.GetType() == typeof(BitwiseOperatorToken) && (((BitwiseOperatorToken)currentToken).type == BitwiseOperatorType.LeftShift || ((BitwiseOperatorToken)currentToken).type == BitwiseOperatorType.RightShift)) {
+                BitwiseOperatorToken currentOperatorToken = (BitwiseOperatorToken)currentToken;
+                switch (currentOperatorToken.type) {
+                    case BitwiseOperatorType.LeftShift:
+                        Step();
+                        left = new BitwiseOperatorNode(BitwiseOperation.LeftShift, left, Additive());
+                        break;
+                    case BitwiseOperatorType.RightShift:
+                        Step();
+                        left = new BitwiseOperatorNode(BitwiseOperation.RightShift, left, Additive());
+                        break;
+                }
             }
             return left;
         }

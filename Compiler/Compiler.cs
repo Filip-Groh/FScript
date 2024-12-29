@@ -128,6 +128,42 @@ namespace Compiler {
                 }
 
                 return new NodeBytecode(instructions, left.outputRegister);
+            } else if (node.GetType() == typeof(BitwiseOperatorNode)) {
+                BitwiseOperatorNode bitwiseOperatorNode = (BitwiseOperatorNode)node;
+
+                NodeBytecode? leftBrench = CompileNode(bitwiseOperatorNode.left, variables);
+                NodeBytecode? rightBrench = CompileNode(bitwiseOperatorNode.right, variables);
+
+                if (leftBrench == null || rightBrench == null) {
+                    throw new InvalidOperationException("Missing brench!");
+                }
+
+                NodeBytecode left = (NodeBytecode)leftBrench;
+                NodeBytecode right = (NodeBytecode)rightBrench;
+
+                Bytecode[] instructions = new Bytecode[left.instructions.Length + right.instructions.Length + 1];
+                left.instructions.CopyTo(instructions, 0);
+                right.instructions.CopyTo(instructions, left.instructions.Length);
+
+                switch (bitwiseOperatorNode.operation) {
+                    case BitwiseOperation.AND:
+                        instructions[instructions.Length - 1] = new And(left.outputRegister, right.outputRegister);
+                        break;
+                    case BitwiseOperation.OR:
+                        instructions[instructions.Length - 1] = new Or(left.outputRegister, right.outputRegister);
+                        break;
+                    case BitwiseOperation.XOR:
+                        instructions[instructions.Length - 1] = new Xor(left.outputRegister, right.outputRegister);
+                        break;
+                    case BitwiseOperation.LeftShift:
+                        instructions[instructions.Length - 1] = new Sal(left.outputRegister, right.outputRegister);
+                        break;
+                    case BitwiseOperation.RightShift:
+                        instructions[instructions.Length - 1] = new Sar(left.outputRegister, right.outputRegister);
+                        break;
+                }
+
+                return new NodeBytecode(instructions, left.outputRegister);
             } else if (node.GetType() == typeof(ComparisonNode)) {
                 ComparisonNode comparisonNode = (ComparisonNode)node;
 

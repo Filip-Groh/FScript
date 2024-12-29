@@ -26,12 +26,10 @@ namespace CLI {
             Console.WriteLine(Utils.ArrayToString<Token>.ToString(tokens));
 
 
-
             Parser.Parser parser = new Parser.Parser(tokens);
             AST abstractSyntaxTree = parser.Parse();
 
             Console.WriteLine(abstractSyntaxTree);
-
 
 
             Compiler.Compiler compiler = new Compiler.Compiler(abstractSyntaxTree);

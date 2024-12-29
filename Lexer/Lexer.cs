@@ -148,6 +148,9 @@ namespace Lexer {
                 if (currentChar == '=') {
                     tokens.Add(new ComparisonToken("<=", ComparisonType.LessThanOrEqual));
                     Step();
+                } else if (currentChar == '<') {
+                    tokens.Add(new BitwiseOperatorToken("<<", BitwiseOperatorType.LeftShift));  
+                    Step();
                 } else {
                     tokens.Add(new ComparisonToken("<", ComparisonType.LessThan));
                 }
@@ -157,6 +160,9 @@ namespace Lexer {
                 Step();
                 if (currentChar == '=') { 
                     tokens.Add(new ComparisonToken(">=", ComparisonType.GreaterThanOrEqual));
+                    Step();
+                } else if (currentChar == '>') {
+                    tokens.Add(new BitwiseOperatorToken(">>", BitwiseOperatorType.RightShift));
                     Step();
                 } else {
                     tokens.Add(new ComparisonToken(">", ComparisonType.GreaterThan));
@@ -197,7 +203,7 @@ namespace Lexer {
                     tokens.Add(new ConditionToken("&&", ConditionType.AND));
                     Step();
                 } else {
-                    throw new NotImplementedException("Bitwise AND operation isn't implemented YET!");
+                    tokens.Add(new BitwiseOperatorToken("&", BitwiseOperatorType.AND));
                 }
             }
 
@@ -207,8 +213,13 @@ namespace Lexer {
                     tokens.Add(new ConditionToken("||", ConditionType.OR));
                     Step();
                 } else {
-                    throw new NotImplementedException("Bitwise OR operation isn't implemented YET!");
+                    tokens.Add(new BitwiseOperatorToken("|", BitwiseOperatorType.OR));
                 }
+            }
+
+            if (currentChar == '^') {
+                tokens.Add(new BitwiseOperatorToken("^", BitwiseOperatorType.XOR));
+                Step();
             }
         }
     }
