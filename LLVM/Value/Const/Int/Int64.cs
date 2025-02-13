@@ -8,16 +8,16 @@ namespace LLVMManager.Value.Const {
         public ConstInt64Pointer valuePointer { get; init; }
         IValue IValue<IValue>.valuePointer { get => valuePointer; init => valuePointer = (ConstInt64Pointer)value; }
 
-        public ConstInt64(Int64Type type, ulong number, int signExtend) {
-            valuePointer = ConstantLibrary.CreateConstInt64(type.typePointer, number, signExtend);
+        public ConstInt64(Int64Type type, ulong number, bool isSigned = false) {
+            valuePointer = ConstantLibrary.CreateConstInt64(type.typePointer, number, isSigned);
+        }
+
+        public ConstInt64(Int64Type type, long number) : this(type, (ulong)number, number < 0) {
+
         }
 
         public ConstInt64(ConstInt64Pointer valuePointer) {
             this.valuePointer = valuePointer;
-        }
-
-        public static implicit operator ConstInt64(Instruction<ConstInt64Pointer> instructionValue) {
-            return new ConstInt64(instructionValue.valuePointer);
         }
     }
 }

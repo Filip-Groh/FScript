@@ -12,8 +12,8 @@ namespace LLVMLibrary.Value.Const {
     }
 
     public static unsafe partial class ConstantLibrary {
-        public static ConstInt8Pointer CreateConstInt8(TypeInt8Pointer intType, ulong number, int signExtend) {
-            return new ConstInt8Pointer(LLVM.ConstInt(intType.pointer, number, signExtend));
+        public static ConstInt8Pointer CreateConstInt8(TypeInt8Pointer intType, ulong number, bool isSigned) {
+            return new ConstInt8Pointer(LLVM.ConstInt(intType.pointer, number, isSigned ? 1 : 0));
         }
     }
 }

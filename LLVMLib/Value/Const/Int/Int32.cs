@@ -12,8 +12,8 @@ namespace LLVMLibrary.Value.Const {
     }
 
     public static unsafe partial class ConstantLibrary {
-        public static ConstInt32Pointer CreateConstInt32(TypeInt32Pointer intType, ulong number, int signExtend) {
-            return new ConstInt32Pointer(LLVM.ConstInt(intType.pointer, number, signExtend));
+        public static ConstInt32Pointer CreateConstInt32(TypeInt32Pointer intType, ulong number, bool isSigned) {
+            return new ConstInt32Pointer(LLVM.ConstInt(intType.pointer, number, isSigned ? 1 : 0));
         }
     }
 }
